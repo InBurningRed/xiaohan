@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADHD 事项启动器 Demo</title>
+    <meta name="theme-color" content="#ff4fb3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ADHD启动器" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="card" aria-label="ADHD 友好事项启动器">
+        <header class="header">
+          <div class="brand">
+            <div class="logo" aria-hidden="true">★</div>
+            <div class="brand-text">
+              <h1 class="title">事项启动器</h1>
+              <p class="subtitle">把“大任务”变成可以立刻开始的 1 步。</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="chip" type="button" data-action="example">Try example</button>
+            <button class="chip chip-ghost" type="button" data-action="reset">Reset</button>
+          </div>
+        </header>
+
+        <section class="input" aria-label="任务输入">
+          <label class="field">
+            <span class="field-label">你现在要做什么？</span>
+            <textarea
+              class="field-textarea"
+              rows="3"
+              placeholder="例如：我要从床上去阳台浇花"
+              id="taskInput"
+            ></textarea>
+          </label>
+          <div class="input-actions">
+            <button class="btn btn-primary" type="button" data-action="generate">生成清单</button>
+          </div>
+
+          <details class="settings" id="settings">
+            <summary class="settings-summary">API 设置（可选 / optional）</summary>
+            <div class="settings-body" aria-label="API 设置">
+              <label class="field">
+                <span class="field-label">调用方式</span>
+                <select class="field-select" id="apiMode">
+                  <option value="proxy">本地代理（推荐）/ Proxy</option>
+                  <option value="direct">直连（不安全）/ Direct</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Base URL（DeepSeek/OpenAI 兼容）</span>
+                <input class="field-input" id="apiBaseUrl" type="text" spellcheck="false" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">API Key（仅保存在你的浏览器本地）</span>
+                <input class="field-input" id="apiKey" type="password" autocomplete="off" spellcheck="false" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">Model</span>
+                <input class="field-input" id="apiModel" type="text" spellcheck="false" />
+              </label>
+
+              <label class="field field-toggle">
+                <span class="field-label">AI 说明（步骤小字）</span>
+                <span class="toggle">
+                  <input id="aiNotes" type="checkbox" />
+                  <span class="toggle-pill" aria-hidden="true"></span>
+                </span>
+              </label>
+
+              <div class="settings-actions">
+                <button class="btn btn-ghost" type="button" data-action="save-settings">保存</button>
+                <span class="settings-hint" id="settingsHint"></span>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="progress" aria-label="进度">
+          <div class="progress-top">
+            <div class="bubble" id="bubble" aria-live="polite" aria-atomic="true"></div>
+            <div class="meter" aria-hidden="true">
+              <div class="meter-bar" id="meterBar"></div>
+            </div>
+          </div>
+          <div class="progress-meta">
+            <span class="progress-text" id="progressText">0 / 0</span>
+            <span class="progress-text" id="progressPct">0%</span>
+          </div>
+        </section>
+
+        <section class="list" aria-label="原子清单">
+          <ol class="steps" id="steps"></ol>
+          <div class="list-actions">
+            <button class="btn btn-ghost" type="button" data-action="add-step">+ Add step</button>
+            <button class="btn btn-ghost" type="button" data-action="clear-done">清除已完成</button>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <span class="footer-desktop"><span class="kbd">Enter</span> 生成清单，<span class="kbd">Space</span> 勾选步骤</span>
+          <span class="footer-mobile">点圆圈勾选，点条目展开/收起子清单</span>
+        </footer>
+      </main>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="confetti" aria-hidden="true" id="confetti"></div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
+

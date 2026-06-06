@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --work-primary: #E8846B;
+            --work-secondary: #F5A78D;
+            --work-bg: #FEF3EE;
+            --break-primary: #7AB8A8;
+            --break-secondary: #A5D4C8;
+            --break-bg: #EEF7F5;
+            --cream: #FFFBF7;
+            --text-dark: #4A3F35;
+            --text-muted: #9A8B7E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--work-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.6s ease;
+            overflow: hidden;
+        }
+
+        body.break-mode {
+            background: var(--break-bg);
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mode-label {
+            font-size: 0.875rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeSlideDown 0.8s ease forwards;
+        }
+
+        .timer-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 3rem;
+        }
+
+        .timer-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--cream);
+            box-shadow: 
+                0 20px 60px -10px rgba(232, 132, 107, 0.25),
+                0 0 0 8px rgba(255, 255, 255, 0.5),
+                inset 0 -4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.6s ease;
+        }
+
+        .break-mode .timer-circle {
+            box-shadow: 
+                0 20px 60px -10px rgba(122, 184, 168, 0.3),
+                0 0 0 8px rgba(255, 255, 255, 0.5),
+                inset 0 -4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: calc(100% + 20px);
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .progress-ring .bg {
+            stroke: rgba(232, 132, 107, 0.15);
+            transition: stroke 0.6s ease;
+        }
+
+        .break-mode .progress-ring .bg {
+            stroke: rgba(122, 184, 168, 0.15);
+        }
+
+        .progress-ring .progress {
+            stroke: var(--work-primary);
+            stroke-dasharray: 1005.3;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.3s ease, stroke 0.6s ease;
+        }
+
+        .break-mode .progress-ring .progress {
+            stroke: var(--break-primary);
+        }
+
+        .timer-display {
+            font-family: 'Fraunces', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timer-display.running {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 0.2s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 100px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--work-primary);
+            color: white;
+            box-shadow: 0 4px 20px -4px rgba(232, 132, 107, 0.5);
+            min-width: 140px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px -4px rgba(232, 132, 107, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .break-mode .btn-primary {
+            background: var(--break-primary);
+            box-shadow: 0 4px 20px -4px rgba(122, 184, 168, 0.5);
+        }
+
+        .break-mode .btn-primary:hover {
+            box-shadow: 0 8px 30px -4px rgba(122, 184, 168, 0.6);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-muted);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-dark);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .mode-switch {
+            margin-top: 3rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease 0.4s forwards;
+        }
+
+        .mode-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid transparent;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--work-primary);
+            border-color: var(--work-primary);
+            box-shadow: 0 2px 10px rgba(232, 132, 107, 0.2);
+        }
+
+        .break-mode .mode-btn.active {
+            color: var(--break-primary);
+            border-color: var(--break-primary);
+            box-shadow: 0 2px 10px rgba(122, 184, 168, 0.2);
+        }
+
+        .decorative-circle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .decorative-circle.one {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--work-secondary) 0%, transparent 70%);
+            top: -150px;
+            right: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .decorative-circle.two {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--work-primary) 0%, transparent 70%);
+            bottom: -100px;
+            left: -80px;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        .break-mode .decorative-circle.one {
+            background: radial-gradient(circle, var(--break-secondary) 0%, transparent 70%);
+        }
+
+        .break-mode .decorative-circle.two {
+            background: radial-gradient(circle, var(--break-primary) 0%, transparent 70%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.1); }
+        }
+
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 100;
+        }
+
+        .completion-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .completion-content {
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.4s ease;
+        }
+
+        .completion-overlay.show .completion-content {
+            transform: scale(1);
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .completion-text {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+        }
+
+        .completion-btn {
+            padding: 1rem 3rem;
+            background: var(--work-primary);
+            color: white;
+            border: none;
+            border-radius: 100px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .completion-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="decorative-circle one"></div>
+    <div class="decorative-circle two"></div>
+    
+    <div class="container">
+        <div class="mode-label" id="modeLabel">专注时间</div>
+        
+        <div class="timer-wrapper">
+            <svg class="progress-ring" viewBox="0 0 340 340">
+                <circle class="bg" cx="170" cy="170" r="160"></circle>
+                <circle class="progress" id="progressCircle" cx="170" cy="170" r="160"></circle>
+            </svg>
+            <div class="timer-circle">
+                <div class="timer-display" id="timerDisplay">25:00</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">开始</button>
+            <button class="btn btn-secondary" id="resetBtn">重置</button>
+        </div>
+        
+        <div class="mode-switch">
+            <button class="mode-btn active" id="workModeBtn">工作 25分钟</button>
+            <button class="mode-btn" id="breakModeBtn">休息 5分钟</button>
+        </div>
+    </div>
+    
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-content">
+            <div class="completion-icon" id="completionIcon">🍅</div>
+            <div class="completion-text" id="completionText">时间到！</div>
+            <button class="completion-btn" id="completionBtn">继续</button>
+        </div>
+    </div>
+
+    <script>
+        const WORK_TIME = 25 * 60;
+        const BREAK_TIME = 5 * 60;
+        const CIRCLE_LENGTH = 2 * Math.PI * 160;
+        
+        let timeLeft = WORK_TIME;
+        let totalTime = WORK_TIME;
+        let timerInterval = null;
+        let isRunning = false;
+        let isBreakMode = false;
+        
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressCircle = document.getElementById('progressCircle');
+        const workModeBtn = document.getElementById('workModeBtn');
+        const breakModeBtn = document.getElementById('breakModeBtn');
+        const modeLabel = document.getElementById('modeLabel');
+        const completionOverlay = document.getElementById('completionOverlay');
+        const completionBtn = document.getElementById('completionBtn');
+        const completionText = document.getElementById('completionText');
+        const completionIcon = document.getElementById('completionIcon');
+        
+        progressCircle.style.strokeDasharray = CIRCLE_LENGTH;
+        progressCircle.style.strokeDashoffset = 0;
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            const progress = (totalTime - timeLeft) / totalTime;
+            const offset = CIRCLE_LENGTH * progress;
+            progressCircle.style.strokeDashoffset = offset;
+        }
+        
+        function playCompletionSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const frequencies = [523.25, 659.25, 783.99, 1046.50];
+            
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                }, index * 150);
+            });
+        }
+        
+        function showCompletion() {
+            if (isBreakMode) {
+                completionIcon.textContent = '☕';
+                completionText.textContent = '休息结束！';
+            } else {
+                completionIcon.textContent = '🍅';
+                completionText.textContent = '完成！休息一下吧';
+            }
+            completionOverlay.classList.add('show');
+        }
+        
+        function hideCompletion() {
+            completionOverlay.classList.remove('show');
+        }
+        
+        function tick() {
+            timeLeft--;
+            updateDisplay();
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                startBtn.textContent = '开始';
+                timerDisplay.classList.remove('running');
+                playCompletionSound();
+                showCompletion();
+            }
+        }
+        
+        function startTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                startBtn.textContent = '继续';
+                timerDisplay.classList.remove('running');
+            } else {
+                isRunning = true;
+                startBtn.textContent = '暂停';
+                timerDisplay.classList.add('running');
+                timerInterval = setInterval(tick, 1000);
+            }
+        }
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            timeLeft = isBreakMode ? BREAK_TIME : WORK_TIME;
+            totalTime = timeLeft;
+            startBtn.textContent = '开始';
+            timerDisplay.classList.remove('running');
+            updateDisplay();
+        }
+        
+        function switchMode(toBreak) {
+            if (toBreak === isBreakMode) return;
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            isBreakMode = toBreak;
+            timeLeft = toBreak ? BREAK_TIME : WORK_TIME;
+            totalTime = timeLeft;
+            startBtn.textContent = '开始';
+            timerDisplay.classList.remove('running');
+            
+            if (toBreak) {
+                document.body.classList.add('break-mode');
+                workModeBtn.classList.remove('active');
+                breakModeBtn.classList.add('active');
+                modeLabel.textContent = '休息时间';
+            } else {
+                document.body.classList.remove('break-mode');
+                workModeBtn.classList.add('active');
+                breakModeBtn.classList.remove('active');
+                modeLabel.textContent = '专注时间';
+            }
+            
+            updateDisplay();
+        }
+        
+        startBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        workModeBtn.addEventListener('click', () => switchMode(false));
+        breakModeBtn.addEventListener('click', () => switchMode(true));
+        completionBtn.addEventListener('click', () => {
+            hideCompletion();
+            switchMode(!isBreakMode);
+        });
+        
+        updateDisplay();
+    </script>
+</body>
+</html>
