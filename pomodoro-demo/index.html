@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>番茄钟 Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app" data-mode="focus">
+      <main class="card" aria-label="番茄钟">
+        <header class="header">
+          <h1 class="title">番茄钟</h1>
+          <div class="header-actions">
+            <button class="icon-btn" type="button" data-action="settings" aria-label="调整时长">
+              时长
+            </button>
+            <button class="icon-btn" type="button" data-action="notify" aria-label="启用通知">
+              通知
+            </button>
+          </div>
+        </header>
+
+        <nav class="tabs" role="tablist" aria-label="模式">
+          <button class="tab is-active" type="button" data-mode="focus" role="tab" aria-selected="true">
+            专注
+          </button>
+          <button class="tab" type="button" data-mode="short" role="tab" aria-selected="false">短休</button>
+          <button class="tab" type="button" data-mode="long" role="tab" aria-selected="false">长休</button>
+        </nav>
+
+        <section class="timer" aria-label="计时器">
+          <div class="ring">
+            <div class="ring-content">
+              <div class="time" aria-live="polite" aria-atomic="true">25:00</div>
+              <div class="hint" aria-live="polite" aria-atomic="true">准备开始</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="actions" aria-label="操作">
+          <button class="btn btn-primary" type="button" data-action="toggle">开始</button>
+          <button class="btn btn-ghost" type="button" data-action="reset">重置</button>
+          <button class="btn btn-ghost" type="button" data-action="skip">跳过</button>
+        </section>
+
+        <section class="meta" aria-label="统计">
+          <div class="meta-item">
+            第 <span id="round">1</span>/4 个番茄
+          </div>
+          <div class="meta-item">
+            今日专注 <span id="today">0</span> min
+          </div>
+        </section>
+
+        <footer class="footer">
+          <span class="kbd">Space</span> 开始/暂停，<span class="kbd">R</span> 重置
+        </footer>
+      </main>
+    </div>
+
+    <dialog class="dialog" data-dialog="settings" aria-label="时长设置">
+      <form method="dialog" class="dialog-card">
+        <header class="dialog-header">
+          <h2 class="dialog-title">时长设置</h2>
+        </header>
+
+        <section class="dialog-body">
+          <label class="field">
+            <span class="field-label">专注（分钟）</span>
+            <input class="field-input" type="number" min="1" max="180" step="1" name="focusMinutes" />
+          </label>
+
+          <label class="field">
+            <span class="field-label">强制休息（分钟）</span>
+            <input class="field-input" type="number" min="1" max="60" step="1" name="forcedBreakMinutes" />
+          </label>
+        </section>
+
+        <footer class="dialog-actions">
+          <button class="btn btn-ghost" type="button" data-action="settings-reset">恢复默认</button>
+          <div class="dialog-actions-right">
+            <button class="btn btn-ghost" type="button" data-action="settings-cancel">取消</button>
+            <button class="btn btn-primary" type="button" data-action="settings-save">保存</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
