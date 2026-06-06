@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="96" y1="64" x2="432" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff4fb3" stop-opacity="1" />
+      <stop offset="0.5" stop-color="#43a4ff" stop-opacity="1" />
+      <stop offset="1" stop-color="#19c37d" stop-opacity="1" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(160 140) rotate(45) scale(320 320)">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.48" />
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#bg)" />
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#glow)" />
+  <path d="M256 128 L286.6 206.9 L369 213.9 L305 265.9 L325.2 346.6 L256 301.8 L186.8 346.6 L207 265.9 L143 213.9 L225.4 206.9 Z" fill="#ffffff" fill-opacity="0.92" />
+  <path d="M256 156 L278.5 213.7 L339 219.1 L292 257.2 L306.7 316.2 L256 283.4 L205.3 316.2 L220 257.2 L173 219.1 L233.5 213.7 Z" fill="#1f2430" fill-opacity="0.12" />
+</svg>
+
