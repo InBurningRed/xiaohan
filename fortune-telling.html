@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>命理推算 · 传统八字命理学</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", "STSong", serif;
+    background: #1a0a0a;
+    color: #d4c8a0;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(139, 69, 19, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(218, 165, 32, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+  }
+
+  /* ===== Layout ===== */
+  .container { max-width: 880px; margin: 0 auto; padding: 20px; }
+
+  /* ===== Header ===== */
+  .header {
+    text-align: center; padding: 40px 20px 20px;
+    border-bottom: 1px solid rgba(218, 165, 32, 0.25);
+    margin-bottom: 30px;
+  }
+  .header .symbol {
+    font-size: 48px; display: block; margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(218,165,32,0.4));
+  }
+  .header h1 {
+    font-size: 32px; letter-spacing: 8px; color: #daa520;
+    text-shadow: 0 0 20px rgba(218,165,32,0.35);
+    font-weight: 400;
+  }
+  .header .subtitle {
+    font-size: 13px; color: #8b7355; letter-spacing: 4px; margin-top: 6px;
+  }
+
+  /* ===== Cards ===== */
+  .card {
+    background: rgba(30, 15, 10, 0.85);
+    border: 1px solid rgba(218, 165, 32, 0.18);
+    border-radius: 8px; padding: 24px; margin-bottom: 18px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+  .card-title {
+    font-size: 20px; color: #daa520; letter-spacing: 4px;
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(218,165,32,0.15);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .icon { font-size: 22px; }
+
+  /* ===== Form ===== */
+  .form-row {
+    display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;
+  }
+  .form-group {
+    display: flex; flex-direction: column; gap: 6px;
+    flex: 1; min-width: 120px;
+  }
+  .form-group label {
+    font-size: 13px; color: #c0a860; letter-spacing: 2px;
+  }
+  .form-group input, .form-group select {
+    background: rgba(20, 10, 5, 0.9);
+    border: 1px solid rgba(218,165,32,0.3);
+    color: #daa520; padding: 10px 14px; border-radius: 4px;
+    font-size: 15px; font-family: inherit; letter-spacing: 1px;
+    outline: none; transition: border-color 0.3s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: #daa520; box-shadow: 0 0 8px rgba(218,165,32,0.15);
+  }
+  .form-group select option { background: #1a0a0a; color: #daa520; }
+  .btn {
+    background: linear-gradient(135deg, #8b4513, #a0522d);
+    color: #ffd700; border: 1px solid #b8860b;
+    padding: 12px 32px; border-radius: 4px; cursor: pointer;
+    font-size: 16px; font-family: inherit; letter-spacing: 4px;
+    transition: all 0.3s; white-space: nowrap;
+  }
+  .btn:hover { background: linear-gradient(135deg, #a0522d, #b5651d); box-shadow: 0 0 18px rgba(218,165,32,0.3); }
+  .btn:active { transform: scale(0.97); }
+
+  .note {
+    font-size: 11px; color: #8b7355; margin-top: 10px; letter-spacing: 1px;
+    font-style: italic;
+  }
+
+  /* ===== Results ===== */
+  #results { display: none; }
+  #results.visible { display: block; }
+
+  /* Pillars Table */
+  .pillars-table {
+    width: 100%; border-collapse: collapse; text-align: center;
+    font-size: 15px;
+  }
+  .pillars-table th {
+    background: rgba(139, 69, 19, 0.3); color: #daa520;
+    padding: 10px 8px; letter-spacing: 3px; font-weight: 400;
+    border: 1px solid rgba(218,165,32,0.15);
+  }
+  .pillars-table td {
+    padding: 12px 8px; border: 1px solid rgba(218,165,32,0.12);
+    letter-spacing: 2px;
+  }
+  .pillars-table .stem-branch {
+    font-size: 22px; color: #ffd700; font-weight: bold;
+    letter-spacing: 4px;
+  }
+  .pillars-table .na-yin {
+    font-size: 12px; color: #b8964e;
+  }
+  .pillar-label {
+    font-size: 12px; color: #8b7355; display: block;
+  }
+
+  /* Element tags */
+  .element-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 3px;
+    font-size: 12px; letter-spacing: 1px; margin: 2px;
+  }
+  .elem-wood  { background: rgba(72,139,48,0.3); color: #6bbf4a; border: 1px solid #4a8f2c; }
+  .elem-fire  { background: rgba(200,50,30,0.3);  color: #f06040; border: 1px solid #a03020; }
+  .elem-earth { background: rgba(180,140,50,0.3); color: #d4a030; border: 1px solid #8b6914; }
+  .elem-metal { background: rgba(200,180,120,0.25); color: #e8d080; border: 1px solid #a09850; }
+  .elem-water { background: rgba(40,80,160,0.3); color: #6098e8; border: 1px solid #3060a0; }
+
+  /* Element balance bars */
+  .balance-bar-wrap {
+    display: flex; align-items: center; gap: 8px; margin: 5px 0;
+  }
+  .balance-label {
+    width: 28px; font-size: 14px; text-align: center; letter-spacing: 1px;
+  }
+  .balance-track {
+    flex: 1; height: 16px; background: rgba(0,0,0,0.5);
+    border-radius: 3px; overflow: hidden;
+  }
+  .balance-fill {
+    height: 100%; border-radius: 3px; transition: width 1s ease;
+  }
+  .balance-value {
+    width: 36px; font-size: 12px; text-align: right; color: #c0a860;
+  }
+
+  /* Bone weight */
+  .bone-weight-big {
+    font-size: 48px; text-align: center; color: #ffd700;
+    letter-spacing: 4px; padding: 10px 0;
+    text-shadow: 0 0 30px rgba(218,165,32,0.4);
+  }
+  .bone-detail { font-size: 13px; color: #8b7355; text-align: center; letter-spacing: 2px; }
+  .bone-interp {
+    margin-top: 14px; padding: 16px; background: rgba(0,0,0,0.3);
+    border-radius: 4px; line-height: 2; letter-spacing: 1px; font-size: 14px;
+  }
+
+  /* Ten Gods */
+  .ten-gods-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+    gap: 10px; margin-top: 10px;
+  }
+  .ten-god-item {
+    background: rgba(0,0,0,0.3); border-radius: 4px;
+    padding: 12px; text-align: center;
+    border: 1px solid rgba(218,165,32,0.1);
+  }
+  .ten-god-item .pillar-name { font-size: 11px; color: #8b7355; }
+  .ten-god-item .god-name { font-size: 16px; color: #daa520; letter-spacing: 2px; }
+
+  /* Zodiac */
+  .zodiac-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 18px; color: #daa520; letter-spacing: 2px;
+    padding: 6px 14px; border: 1px solid rgba(218,165,32,0.25);
+    border-radius: 20px;
+  }
+
+  /* Fortune summary */
+  .fortune-summary {
+    line-height: 2.2; letter-spacing: 1.2px; font-size: 15px;
+    padding: 16px; background: rgba(0,0,0,0.25);
+    border-left: 3px solid #b8860b;
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* Two column */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Disclaimer */
+  .disclaimer {
+    text-align: center; font-size: 11px; color: #5a4030;
+    margin-top: 40px; padding: 20px; letter-spacing: 2px;
+  }
+
+  @media (max-width: 640px) {
+    .form-row { flex-direction: column; }
+    .two-col { grid-template-columns: 1fr; }
+    .header h1 { font-size: 24px; letter-spacing: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ===== Header ===== -->
+  <div class="header">
+    <span class="symbol">☯</span>
+    <h1>命 理 推 算</h1>
+    <p class="subtitle">四柱八字 · 五行纳音 · 称骨算命</p>
+  </div>
+
+  <!-- ===== Input Form ===== -->
+  <div class="card" id="input-card">
+    <div class="card-title">
+      <span class="icon">📅</span> 请输入出生信息
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>出生年份</label>
+        <input type="number" id="year" placeholder="如 1990" min="1900" max="2100" value="1990">
+      </div>
+      <div class="form-group">
+        <label>出生月份</label>
+        <select id="month">
+          <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+          <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+          <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+          <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>出生日期</label>
+        <select id="day"></select>
+      </div>
+      <div class="form-group">
+        <label>出生时辰</label>
+        <select id="hour">
+          <option value="-1">不清楚</option>
+          <option value="0">子时 (23:00-01:00)</option><option value="1">丑时 (01:00-03:00)</option>
+          <option value="2">寅时 (03:00-05:00)</option><option value="3">卯时 (05:00-07:00)</option>
+          <option value="4">辰时 (07:00-09:00)</option><option value="5">巳时 (09:00-11:00)</option>
+          <option value="6" selected>午时 (11:00-13:00)</option><option value="7">未时 (13:00-15:00)</option>
+          <option value="8">申时 (15:00-17:00)</option><option value="9">酉时 (17:00-19:00)</option>
+          <option value="10">戌时 (19:00-21:00)</option><option value="11">亥时 (21:00-23:00)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>性别</label>
+        <select id="gender">
+          <option value="male">男</option>
+          <option value="female">女</option>
+        </select>
+      </div>
+      <div class="form-group" style="justify-content:flex-end;">
+        <button class="btn" onclick="calculateFortune()">开 始 推 算</button>
+      </div>
+    </div>
+    <p class="note">※ 本程序基于传统命理学算法推算，时辰不确时可选"不清楚"，默认为午时。结果仅供娱乐参考。</p>
+  </div>
+
+  <!-- ===== Results ===== -->
+  <div id="results">
+
+    <!-- Four Pillars -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🔮</span> 四柱八字
+      </div>
+      <table class="pillars-table">
+        <thead>
+          <tr>
+            <th></th><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#8b7355;">天干</td>
+            <td class="stem-branch" id="cell-year-stem">-</td>
+            <td class="stem-branch" id="cell-month-stem">-</td>
+            <td class="stem-branch" id="cell-day-stem">-</td>
+            <td class="stem-branch" id="cell-hour-stem">-</td>
+          </tr>
+          <tr>
+            <td style="color:#8b7355;">地支</td>
+            <td class="stem-branch" id="cell-year-branch">-</td>
+            <td class="stem-branch" id="cell-month-branch">-</td>
+            <td class="stem-branch" id="cell-day-branch">-</td>
+            <td class="stem-branch" id="cell-hour-branch">-</td>
+          </tr>
+          <tr>
+            <td style="color:#8b7355;">纳音</td>
+            <td class="na-yin" id="cell-year-nayin">-</td>
+            <td class="na-yin" id="cell-month-nayin">-</td>
+            <td class="na-yin" id="cell-day-nayin">-</td>
+            <td class="na-yin" id="cell-hour-nayin">-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Two-Column: Five Elements + Ten Gods -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">☯</span> 五行分布
+        </div>
+        <div id="five-elements-chart"></div>
+        <div id="five-elements-verdict" style="margin-top:12px;font-size:13px;color:#b8964e;line-height:2;letter-spacing:1px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">👤</span> 十神关系
+        </div>
+        <p style="font-size:12px;color:#8b7355;margin-bottom:8px;">以日干<span id="day-master-label" style="color:#daa520;">—</span>为"我"</p>
+        <div class="ten-gods-grid" id="ten-gods-grid"></div>
+      </div>
+    </div>
+
+    <!-- Bone Weight -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">⚖</span> 称骨算命
+      </div>
+      <div class="bone-weight-big" id="bone-total">-</div>
+      <div class="bone-detail" id="bone-breakdown"></div>
+      <div class="bone-interp" id="bone-interp"></div>
+    </div>
+
+    <!-- Fortune Summary -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">📜</span> 综合运势解读
+      </div>
+      <div class="fortune-summary" id="fortune-summary"></div>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    ⚠ 本程序为传统文化娱乐工具，推算结果仅供消遣参考，切勿迷信。<br>
+    命由天定，运由己造。但行好事，莫问前程。
+  </p>
+</div>
+
+<script>
+// ===========================
+//  DATA DEFINITIONS
+// ===========================
+
+const HEAVENLY_STEMS   = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const EARTHLY_BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const ZODIAC_NAMES     = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+const ZODIAC_EMOJI     = ['🐭','🐮','🐯','🐰','🐲','🐍','🐴','🐑','🐵','🐔','🐶','🐷'];
+
+// Five-element mapping for stems
+const STEM_ELEMENT = [0,0, 1,1, 2,2, 3,3, 4,4]; // 木木火火土土金金水水
+// index: 0=木,1=火,2=土,3=金,4=水
+const ELEM_NAMES = ['木','火','土','金','水'];
+const ELEM_COLORS = ['#6bbf4a','#f06040','#d4a030','#e8d080','#6098e8'];
+const ELEM_COLORS_BG = ['rgba(72,139,48,0.5)','rgba(200,50,30,0.5)','rgba(180,140,50,0.5)','rgba(200,180,120,0.4)','rgba(40,80,160,0.5)'];
+const ELEM_CSS = ['elem-wood','elem-fire','elem-earth','elem-metal','elem-water'];
+
+// Five-element mapping for branches
+const BRANCH_ELEMENT = [4,2, 0,0, 2,1, 1,2, 3,3, 2,4]; // 子水 丑土 寅木 卯木 辰土 巳火 午火 未土 申金 酉金 戌土 亥水
+
+// Yin/Yang: 甲丙戊庚壬 = yang (1), 乙丁己辛癸 = yin (0)
+const STEM_YINYANG = [1,0, 1,0, 1,0, 1,0, 1,0];
+
+// ===== Na Yin (30 types for 60 pairs) =====
+// Organized by jiazi-order pair index (0-29, each covers 2 jiazi)
+const NA_YIN_NAMES = [
+  '海中金','炉中火','大林木','路旁土','剑锋金',
+  '山头火','涧下水','城头土','白蜡金','杨柳木',
+  '井泉水','屋上土','霹雳火','松柏木','长流水',
+  '沙中金','山下火','平地木','壁上土','金箔金',
+  '覆灯火','天河水','大驿土','钗钏金','桑柘木',
+  '大溪水','沙中土','天上火','石榴木','大海水'
+];
+
+// Na yin element for each of the 30 na-yin groups
+const NA_YIN_ELEMENT = [
+  3,1,0,2,3, // 金火木土金
+  1,4,2,3,0, // 火水土金木
+  4,2,1,0,4, // 水土火木水
+  3,1,0,2,3, // 金火木土金
+  1,4,2,3,0, // 火水土金木
+  4,2,1,0,4  // 水土火木水
+];
+
+// ===== Bone Weighing Weight Tables (in 两) =====
+// Year weights: indexed by (stem*10 + branch) for 60 Jiazi years
+const BONE_YEAR_WEIGHT = {};
+(function() {
+  const w = [
+    1.2,0.9,0.6,0.7,1.2,0.5,0.9,0.8,0.7,0.8,1.5,0.9,
+    1.6,0.8,0.8,1.9,1.2,0.6,0.8,0.7,0.5,1.5,0.6,1.6,
+    1.5,0.7,0.9,1.2,1.0,0.7,1.5,0.6,0.5,1.4,1.4,0.9,
+    0.7,0.7,0.9,1.2,0.8,0.7,1.3,0.5,1.4,0.5,0.9,1.7,
+    0.5,0.7,1.2,0.8,0.8,0.6,1.9,0.6,0.8,1.6,1.0,0.6
+  ];
+  for(let i=0;i<60;i++){
+    const s = i % 10, b = i % 12;
+    BONE_YEAR_WEIGHT[s*12+b] = w[i];
+  }
+})();
+
+// Month weight (lunar month 1-12)
+const BONE_MONTH_WEIGHT = [0, 0.6,0.7,1.8,0.9,0.5,1.6,0.9,1.5,1.8,0.8,0.9,0.5];
+
+// Day weight (lunar day 1-30)
+const BONE_DAY_WEIGHT = [
+  0, 0.5,1.0,0.8,1.5,1.6,1.5,0.8,1.6,0.8,1.6,
+  0.9,1.7,0.8,1.7,1.0,0.8,0.9,1.8,0.5,1.5,
+  1.0,0.9,0.8,0.9,1.5,1.8,0.7,0.8,1.6,0.6
+];
+
+// Hour weight (时辰 0-11: 子丑寅卯辰巳午未申酉戌亥)
+const BONE_HOUR_WEIGHT = [1.6,0.6,0.7,1.0,0.9,1.6,1.0,0.8,0.8,0.9,0.6,0.6];
+
+// Bone weight interpretation
+function getBoneInterpretation(total) {
+  const w = total;
+  if (w < 2.2)  return '命格极轻。一生多劳少获，早年辛苦奔波，财来财去难聚守。宜安分守己，修心养性，多行善事积累福报，中年后会逐渐转好。凡事不可强求，随遇而安方为上策。';
+  if (w < 2.8)  return '命格较轻。早年运程多有波折，需经历一番磨砺。中年后运势渐开，虽然大富大贵不易，但衣食无忧可期。宜脚踏实地，不可好高骛远。晚年运势平稳，子女缘分不错。';
+  if (w < 3.5)  return '命格中等偏轻。一生运势起伏较多，但总体向上。早年较辛苦，中年开始转运，事业发展稳中有升。财运方面，正财稳定偏财需谨慎。感情方面宜晚婚，婚姻较为美满。晚年生活安逸。';
+  if (w < 4.2)  return '命格中等。福禄中平之命，一生衣食丰足，无大灾大难。事业运较顺，中年可得贵人扶持，步步高升。财运亨通，善于理财者可有积蓄。婚姻美满，子女聪慧。晚年福气深厚。';
+  if (w < 5.0)  return '命格中上。天生福气较厚，少年得志，青年有成。事业上有领导才能，多得部属拥护。财运颇佳，正偏财皆旺，但需注意不可过于贪心。家庭和睦，子女成材。此命格宜从政或经商。';
+  if (w < 5.6)  return '命格上等。此乃富贵双全之命，一生顺遂少忧。自幼聪慧过人，学业事业皆出众。中年事业大成，财源广进，名利双收。贵人运极旺，遇事多有相助之人。婚姻幸福，子孙满堂，福寿双全。';
+  if (w < 6.5)  return '命格极佳。天赐厚福之命，一生荣华富贵享之不尽。智慧超群，胆识过人，能在各行各业中出类拔萃。权柄在握，声名远播。财运极旺，聚财有方。家庭和美，晚年福泽深厚，荫及子孙。';
+  return '命格顶级。此乃大富大贵之极命，万中无一。天生奇才，气运加身，一生辉煌灿烂。无论从事何种事业皆能登峰造极，功成名就，青史留名。财源滚滚，富可敌国。此命非凡人所有，乃天命所归之大人物。';
+}
+
+// Bone weight key ranges for more specific messages
+function getBoneTagline(total) {
+  const w = total;
+  if (w < 2.2) return '命轻如纸，宜安分守己';
+  if (w < 2.8) return '先苦后甜，晚景安好';
+  if (w < 3.5) return '中平之命，稳中有升';
+  if (w < 4.2) return '福禄中平，衣食丰足';
+  if (w < 5.0) return '福气深厚，富贵可期';
+  if (w < 5.6) return '富贵双全，一生顺遂';
+  if (w < 6.5) return '天赐厚福，荣华富贵';
+  return '天命所归，万中无一';
+}
+
+// ===== Solar Term Month Boundaries (approximate) =====
+// Each entry: [month, day] for the solar term that starts a lunar month
+// 立春(2/4) 惊蛰(3/6) 清明(4/5) 立夏(5/6) 芒种(6/6) 小暑(7/7)
+// 立秋(8/7) 白露(9/8) 寒露(10/8) 立冬(11/7) 大雪(12/7) 小寒(1/6)
+const SOLAR_TERM_START = [
+  [1,6],   // 小寒 → 丑月 (lunar month 12), branch index 1
+  [2,4],   // 立春 → 寅月 (lunar month 1),  branch index 2
+  [3,6],   // 惊蛰 → 卯月 (lunar month 2),  branch index 3
+  [4,5],   // 清明 → 辰月 (lunar month 3),  branch index 4
+  [5,6],   // 立夏 → 巳月 (lunar month 4),  branch index 5
+  [6,6],   // 芒种 → 午月 (lunar month 5),  branch index 6
+  [7,7],   // 小暑 → 未月 (lunar month 6),  branch index 7
+  [8,7],   // 立秋 → 申月 (lunar month 7),  branch index 8
+  [9,8],   // 白露 → 酉月 (lunar month 8),  branch index 9
+  [10,8],  // 寒露 → 戌月 (lunar month 9),  branch index 10
+  [11,7],  // 立冬 → 亥月 (lunar month 10), branch index 11
+  [12,7],  // 大雪 → 子月 (lunar month 11), branch index 0
+  [1,6],   // (next) 小寒 → 丑月
+];
+
+// ===========================
+//  HELPER FUNCTIONS
+// ===========================
+
+/** Get solar-term-based lunar month branch index (0-11) for a given date */
+function getMonthBranchIndex(year, month, day) {
+  // month is 1-12
+  // Find which solar term period this date falls in
+  // We check from the last entry (Dec) backwards to find the right period
+  for (let i = SOLAR_TERM_START.length - 2; i >= 0; i--) {
+    const [sm, sd] = SOLAR_TERM_START[i];
+    const [nm, nd] = SOLAR_TERM_START[i+1];
+    // Check if date is >= sm/sd and < nm/nd
+    if (month === sm && day >= sd) {
+      // After this solar term, so it's in the NEXT lunar month
+      // Actually: 立春(2/4) starts 寅月 (lunar month 1, branch 2)
+      // So the branch index = (i + 1) % 12? Let me reconsider.
+      // i=1 is 立春(2/4): starts lunar month 1 → branch 寅=2
+      // i=2 is 惊蛰(3/6): starts lunar month 2 → branch 卯=3
+      // So branch_index = i + 1
+      return (i + 1) % 12;
+    }
+    if (month === sm && day < sd) {
+      return i % 12;
+    }
+  }
+  // Handle January before 小寒
+  if (month === 1 && day < 6) return 0; // 子月 (lunar month 11, branch 0)
+  return 0;
+}
+
+/** Get lunar month number (1-12) from branch index */
+function lunarMonthFromBranch(branchIdx) {
+  // branch 2(寅)=month1, 3(卯)=month2, ..., 0(子)=month11, 1(丑)=month12
+  return ((branchIdx + 10) % 12) + 1;
+}
+
+/** Get year stem index (0-9) */
+function yearStemIndex(year) {
+  return (year - 4) % 10;
+}
+
+/** Get year branch index (0-11) */
+function yearBranchIndex(year) {
+  return (year - 4) % 12;
+}
+
+/** Calculate month stem index based on year stem and month branch index */
+function monthStemIndex(yearStemIdx, monthBranchIdx) {
+  // month 1 (寅, branch 2) stem depends on year stem:
+  // 甲己年 → 丙, 乙庚 → 戊, 丙辛 → 庚, 丁壬 → 壬, 戊癸 → 甲
+  const baseStems = [2,4,6,8,0]; // for yearStemIdx 0-4
+  const baseStem = baseStems[yearStemIdx % 5];
+  const lunarMonth = lunarMonthFromBranch(monthBranchIdx);
+  return (baseStem + lunarMonth - 1) % 10;
+}
+
+/** Calculate days since 1900-01-01 */
+function daysSince1900(year, month, day) {
+  const d = new Date(year, month - 1, day);
+  const ref = new Date(1900, 0, 1);
+  return Math.round((d - ref) / 86400000);
+}
+
+/** Get day stem and branch indices */
+function dayStemBranch(year, month, day) {
+  const days = daysSince1900(year, month, day);
+  // 1900-01-01 is 甲戌 (stem 0, branch 10)
+  const stem = ((days % 10) + 10) % 10;
+  const branch = ((days % 12) + 10) % 12; // +10 because 1900-01-01 was 戌(branch 10)
+  return [stem, branch];
+}
+
+/** Get hour branch index from hour selection (0-11, -1 for unknown → default noon) */
+function getHourBranch(hourSelect) {
+  if (hourSelect < 0) return 6; // default noon = 午时, branch index 6
+  return hourSelect;
+}
+
+/** Get hour stem index based on day stem and hour branch */
+function hourStemIndex(dayStemIdx, hourBranchIdx) {
+  // 甲己日 → 子时甲, 乙庚 → 丙, 丙辛 → 戊, 丁壬 → 庚, 戊癸 → 壬
+  const baseStems = [0,2,4,6,8]; // for dayStemIdx 0-4
+  const baseStem = baseStems[dayStemIdx % 5];
+  return (baseStem + hourBranchIdx) % 10;
+}
+
+/** Get jiazi index (0-59) from stem and branch */
+function jiaziIndex(stem, branch) {
+  // stem 0-9, branch 0-11
+  // Offset: 甲子(0,0) = jiazi 0
+  const diff = (stem - branch + 12) % 12;
+  if (diff !== 0) {
+    // Not aligned: find first occurrence
+    // Actually the 60-cycle: stem and branch advance together, (stem%10, branch%12)
+    // The jiazi index is the smallest n such that n%10=stem and n%12=branch
+    for (let n = 0; n < 60; n++) {
+      if (n % 10 === stem && n % 12 === branch) return n;
+    }
+  }
+  return stem; // when stem==branch, it's positions 0,12,24,36,48 — but 0%12=0 ✓
+}
+
+/** Get Na Yin name for a stem-branch pair */
+function getNaYin(stem, branch) {
+  const idx = jiaziIndex(stem, branch);
+  const pairIdx = Math.floor(idx / 2);
+  return NA_YIN_NAMES[pairIdx];
+}
+
+/** Get Na Yin element index for a stem-branch pair */
+function getNaYinElement(stem, branch) {
+  const idx = jiaziIndex(stem, branch);
+  const pairIdx = Math.floor(idx / 2);
+  return NA_YIN_ELEMENT[pairIdx];
+}
+
+/** Get Ten God name: relationship of otherStem to dayStem */
+function getTenGod(dayStem, otherStem) {
+  const dElem = STEM_ELEMENT[dayStem];
+  const oElem = STEM_ELEMENT[otherStem];
+  const dYY = STEM_YINYANG[dayStem];
+  const oYY = STEM_YINYANG[otherStem];
+  const sameYY = dYY === oYY;
+
+  if (dElem === oElem) {
+    return sameYY ? '比肩' : '劫财';
+  }
+  // Generation cycle: 木→火→土→金→水→木 (0→1→2→3→4→0)
+  const generates = (dElem + 1) % 5 === oElem;
+  const generatedBy = (oElem + 1) % 5 === dElem;
+
+  if (generates) {
+    // Day stem generates other stem
+    return sameYY ? '食神' : '伤官';
+  }
+  if (generatedBy) {
+    // Other stem generates day stem
+    return sameYY ? '偏印' : '正印';
+  }
+  // Control cycle: 木→土→水→火→金→木
+  // dElem controls oElem
+  const controls = (dElem === 0 && oElem === 2) || (dElem === 2 && oElem === 4) ||
+                   (dElem === 4 && oElem === 1) || (dElem === 1 && oElem === 3) ||
+                   (dElem === 3 && oElem === 0);
+  if (controls) {
+    // Day stem controls other stem
+    return sameYY ? '偏财' : '正财';
+  }
+  // Other stem controls day stem
+  return sameYY ? '七杀' : '正官';
+}
+
+/** Chinese number formatting for bone weight */
+function formatBoneWeight(total) {
+  const liang = Math.floor(total);
+  const qian = Math.round((total - liang) * 10);
+  const nums = ['零','一','二','三','四','五','六','七','八','九','十'];
+  if (liang === 0) return `${nums[qian]}钱`;
+  if (qian === 0) return `${nums[liang]}两`;
+  return `${nums[liang]}两${nums[qian]}钱`;
+}
+
+// ===========================
+//  MAIN CALCULATION
+// ===========================
+
+function calculateFortune() {
+  // Read inputs
+  const year = parseInt(document.getElementById('year').value);
+  const month = parseInt(document.getElementById('month').value);
+  const day = parseInt(document.getElementById('day').value);
+  const hourSelect = parseInt(document.getElementById('hour').value);
+  const gender = document.getElementById('gender').value;
+
+  // Validate
+  if (!year || year < 1900 || year > 2100) { alert('请输入有效的出生年份（1900-2100）'); return; }
+  if (!day) { alert('请输入出生日期'); return; }
+
+  // Calculate Four Pillars
+  const yStem = yearStemIndex(year);
+  const yBranch = yearBranchIndex(year);
+  const mBranch = getMonthBranchIndex(year, month, day);
+  const mStem = monthStemIndex(yStem, mBranch);
+  const [dStem, dBranch] = dayStemBranch(year, month, day);
+  const hBranch = getHourBranch(hourSelect);
+  const hStem = hourStemIndex(dStem, hBranch);
+
+  const pillars = {
+    year:  { stem: yStem, branch: yBranch },
+    month: { stem: mStem, branch: mBranch },
+    day:   { stem: dStem, branch: dBranch },
+    hour:  { stem: hStem, branch: hBranch },
+  };
+
+  // Render Four Pillars table
+  renderPillarCell('cell-year-stem',   HEAVENLY_STEMS[yStem],  STEM_ELEMENT[yStem]);
+  renderPillarCell('cell-year-branch', EARTHLY_BRANCHES[yBranch], BRANCH_ELEMENT[yBranch]);
+  renderPillarCell('cell-month-stem',   HEAVENLY_STEMS[mStem],  STEM_ELEMENT[mStem]);
+  renderPillarCell('cell-month-branch', EARTHLY_BRANCHES[mBranch], BRANCH_ELEMENT[mBranch]);
+  renderPillarCell('cell-day-stem',   HEAVENLY_STEMS[dStem],  STEM_ELEMENT[dStem]);
+  renderPillarCell('cell-day-branch', EARTHLY_BRANCHES[dBranch], BRANCH_ELEMENT[dBranch]);
+  renderPillarCell('cell-hour-stem',   HEAVENLY_STEMS[hStem],  STEM_ELEMENT[hStem]);
+  renderPillarCell('cell-hour-branch', EARTHLY_BRANCHES[hBranch], BRANCH_ELEMENT[hBranch]);
+
+  document.getElementById('cell-year-nayin').textContent  = getNaYin(yStem, yBranch);
+  document.getElementById('cell-month-nayin').textContent = getNaYin(mStem, mBranch);
+  document.getElementById('cell-day-nayin').textContent   = getNaYin(dStem, dBranch);
+  document.getElementById('cell-hour-nayin').textContent  = getNaYin(hStem, hBranch);
+
+  // Render Five Elements
+  renderFiveElements(pillars);
+
+  // Render Ten Gods
+  renderTenGods(dStem, pillars);
+
+  // Render Bone Weight
+  renderBoneWeight(year, month, day, hBranch);
+
+  // Render Fortune Summary
+  renderFortuneSummary(year, pillars, gender, yStem, yBranch, dStem, dBranch);
+
+  // Show results
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderPillarCell(id, text, elementIdx) {
+  const cell = document.getElementById(id);
+  cell.textContent = text;
+  cell.className = 'stem-branch ' + ELEM_CSS[elementIdx];
+}
+
+// ===========================
+//  FIVE ELEMENTS RENDERING
+// ===========================
+
+function renderFiveElements(pillars) {
+  // Count elements across all 8 characters
+  const counts = [0,0,0,0,0]; // 木火土金水
+  const keys = ['year','month','day','hour'];
+  for (const k of keys) {
+    const p = pillars[k];
+    counts[STEM_ELEMENT[p.stem]]++;
+    counts[BRANCH_ELEMENT[p.branch]]++;
+  }
+
+  const total = 8;
+  const container = document.getElementById('five-elements-chart');
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    const pct = Math.round(counts[i] / total * 100);
+    html += `
+    <div class="balance-bar-wrap">
+      <span class="balance-label" style="color:${ELEM_COLORS[i]};">${ELEM_NAMES[i]}</span>
+      <div class="balance-track">
+        <div class="balance-fill" style="width:${pct}%;background:${ELEM_COLORS_BG[i]};"></div>
+      </div>
+      <span class="balance-value">${counts[i]}/8</span>
+    </div>`;
+  }
+  container.innerHTML = html;
+
+  // Verdict
+  const maxElem = counts.indexOf(Math.max(...counts));
+  const minElem = counts.indexOf(Math.min(...counts));
+  const maxCount = counts[maxElem];
+  const minCount = counts[minElem];
+
+  let verdict = '';
+  if (maxCount >= 5) {
+    verdict += `五行中<b style="color:${ELEM_COLORS[maxElem]};">${ELEM_NAMES[maxElem]}</b>过旺（${maxCount}/8），`;
+    const weak = (maxElem + 2) % 5; // controlled element
+    verdict += `需注意<b style="color:${ELEM_COLORS[weak]};">${ELEM_NAMES[weak]}</b>受克。`;
+  } else if (maxCount - minCount <= 1) {
+    verdict += '五行分布<b>较为均衡</b>，是难得的中和之命。';
+  } else {
+    verdict += `<b style="color:${ELEM_COLORS[maxElem]};">${ELEM_NAMES[maxElem]}</b>偏旺（${maxCount}/8），`;
+    verdict += `<b style="color:${ELEM_COLORS[minElem]};">${ELEM_NAMES[minElem]}</b>偏弱（${minCount}/8）。`;
+  }
+
+  // Add balance advice
+  if (minCount <= 1 && minCount < maxCount) {
+    const reinforce = minElem;
+    verdict += `建议在生活中补<b style="color:${ELEM_COLORS[reinforce]};">${ELEM_NAMES[reinforce]}</b>：`;
+    const advice = [
+      ['多接触绿色植物，穿戴绿色衣物，选择东方位。','多穿红色紫色，多晒太阳，选择南方位。','多接触大地色系，佩戴玉石，选择中央位。','多穿戴白色金色饰品，选择西方位。','多接触蓝色黑色，近水而居，选择北方位。']
+    ];
+    verdict += advice[0][reinforce];
+  }
+
+  document.getElementById('five-elements-verdict').innerHTML = verdict;
+}
+
+// ===========================
+//  TEN GODS RENDERING
+// ===========================
+
+function renderTenGods(dayStem, pillars) {
+  document.getElementById('day-master-label').textContent =
+    HEAVENLY_STEMS[dayStem] + '（' + ELEM_NAMES[STEM_ELEMENT[dayStem]] + '）';
+
+  const keys = ['year','month','hour'];
+  const labels = ['年柱','月柱','时柱'];
+  let html = '';
+
+  for (let i = 0; i < 3; i++) {
+    const p = pillars[keys[i]];
+    const god = getTenGod(dayStem, p.stem);
+    const label = labels[i];
+    html += `
+    <div class="ten-god-item">
+      <div class="pillar-name">${label} 天干</div>
+      <div class="god-name">${HEAVENLY_STEMS[p.stem]} → ${god}</div>
+    </div>`;
+  }
+  // Also add the day pillar itself (比肩)
+  html += `
+  <div class="ten-god-item">
+    <div class="pillar-name">日柱 天干（我）</div>
+    <div class="god-name">${HEAVENLY_STEMS[dayStem]} → 元男/元女</div>
+  </div>`;
+
+  document.getElementById('ten-gods-grid').innerHTML = html;
+}
+
+// ===========================
+//  BONE WEIGHT RENDERING
+// ===========================
+
+function renderBoneWeight(year, month, day, hBranch) {
+  // Get year weight from 60 Jiazi index
+  const yStem = yearStemIndex(year);
+  const yBranch = yearBranchIndex(year);
+  const y60 = jiaziIndex(yStem, yBranch);
+  const yWeight = BONE_YEAR_WEIGHT[yStem * 12 + yBranch] || 1.0;
+
+  // Month weight: use solar month as approximate lunar month
+  const mBranch = getMonthBranchIndex(year, month, day);
+  const lunarMonth = lunarMonthFromBranch(mBranch);
+  const mWeight = BONE_MONTH_WEIGHT[lunarMonth];
+
+  // Day weight: use solar day as approximate lunar day (clamped to 1-30)
+  const dClamped = Math.min(day, 30);
+  const dWeight = BONE_DAY_WEIGHT[dClamped];
+
+  // Hour weight
+  const hWeight = BONE_HOUR_WEIGHT[hBranch];
+
+  const total = yWeight + mWeight + dWeight + hWeight;
+
+  document.getElementById('bone-total').textContent = formatBoneWeight(total) + '（' + total.toFixed(1) + '两）';
+  document.getElementById('bone-breakdown').textContent =
+    `年${yWeight.toFixed(1)}两 + 月${mWeight.toFixed(1)}两 + 日${dWeight.toFixed(1)}两 + 时${hWeight.toFixed(1)}两`;
+  document.getElementById('bone-interp').innerHTML =
+    '<b>' + getBoneTagline(total) + '</b><br><br>' + getBoneInterpretation(total);
+}
+
+// ===========================
+//  FORTUNE SUMMARY
+// ===========================
+
+function renderFortuneSummary(year, pillars, gender, yStem, yBranch, dStem, dBranch) {
+  const zodiacIdx = yBranch;
+  const zodiac = ZODIAC_NAMES[zodiacIdx];
+  const zodiacEmoji = ZODIAC_EMOJI[zodiacIdx];
+  const dayElem = STEM_ELEMENT[dStem];
+  const yearElem = STEM_ELEMENT[yStem];
+  const dayMaster = HEAVENLY_STEMS[dStem];
+  const dayElemName = ELEM_NAMES[dayElem];
+
+  // Determine day master strength based on season and element distribution
+  const mBranch = getMonthBranchIndex(year, parseInt(document.getElementById('month').value), parseInt(document.getElementById('day').value));
+  const seasonElem = BRANCH_ELEMENT[mBranch];
+
+  // Check if day master is prosperous in the birth month
+  // 木旺春(寅卯月), 火旺夏(巳午月), 金旺秋(申酉月), 水旺冬(亥子月), 土旺四季(辰戌丑未月)
+  const seasonStrengths = {
+    0: [2,3],   // 木旺寅卯月 (branch indices 2,3)
+    1: [5,6],   // 火旺巳午月 (branch indices 5,6)
+    2: [1,4,7,10], // 土旺辰戌丑未月 (branch indices 1,4,7,10)
+    3: [8,9],   // 金旺申酉月 (branch indices 8,9)
+    4: [0,11],  // 水旺亥子月 (branch indices 0,11)
+  };
+  const isSeasonStrong = seasonStrengths[dayElem] && seasonStrengths[dayElem].includes(mBranch);
+
+  // Count elements in pillars
+  const counts = [0,0,0,0,0];
+  for (const k of ['year','month','day','hour']) {
+    counts[STEM_ELEMENT[pillars[k].stem]]++;
+    counts[BRANCH_ELEMENT[pillars[k].branch]]++;
+  }
+  const dayElemCount = counts[dayElem];
+
+  // Build fortune summary
+  let summary = '';
+
+  // Basic info
+  summary += `<p><b style="color:#daa520;">生肖：</b>${zodiacEmoji} ${zodiac} | `;
+  summary += `<b style="color:#daa520;">日主：</b>${dayMaster}（${dayElemName}命）| `;
+  summary += `<b style="color:#daa520;">性别：</b>${gender === 'male' ? '男' : '女'}</p>`;
+  summary += '<br>';
+
+  // Day master analysis
+  const strength = (dayElemCount >= 3 && isSeasonStrong) ? '身强' :
+                   (dayElemCount >= 3 || isSeasonStrong) ? '身中等偏强' :
+                   (dayElemCount <= 1 && !isSeasonStrong) ? '身弱' : '身中等';
+  summary += `<p><b>🔍 日主强弱：</b>${strength}。`;
+
+  if (strength === '身强') {
+    summary += `日主${dayMaster}${dayElemName}得月令之气，且八字中${dayElemName}势众，命主精力充沛、个性刚强、自主性强。喜克泄耗（`;
+    summary += ['木','火','土','金','水'][(dayElem+2)%5] + '、';
+    summary += ['木','火','土','金','水'][(dayElem+3)%5] + '），';
+    summary += '忌生扶。日常宜保持谦逊，多听取他人意见。';
+  } else if (strength === '身弱') {
+    summary += `日主${dayMaster}${dayElemName}不得时令，力量偏弱。命主性情温和，善于变通，但有时缺乏决断力。喜生扶（`;
+    summary += dayElemName + '、' + ['木','火','土','金','水'][(dayElem+4)%5] + '），';
+    summary += '忌克泄。宜结交贵人，增强自身能量场。';
+  } else {
+    summary += '日主力量适中，为人处事较为平衡，能屈能伸，适应性较强。';
+  }
+  summary += '</p><br>';
+
+  // Career / Wealth / Relationship
+  const elemMessages = {
+    0: {
+      career: '适合文化教育、医疗健康、环保园林等行业发展，木主仁德，做事有恒心毅力。',
+      wealth: '正财运稳健，不宜投机。宜长期投资，积少成多。中年后财运渐旺。',
+      love:  '感情上较为内敛，不善表达。男性需主动大方，女性宜找稳重踏实的伴侣。婚姻晚成更美满。',
+      trait: '为人正直仁慈，有进取心，但有时过于固执。面相清秀，身材修长。'
+    },
+    1: {
+      career: '适合互联网、能源、餐饮娱乐、文化艺术等行业。火主礼，热情大方，富有感染力。',
+      wealth: '财运起伏较大，来得快去得快。宜注意理财规划，不可铺张浪费。偏财运时有惊喜。',
+      love:  '感情热烈主动，桃花运较旺。需注意专一，避免三心二意。已婚者注意与异性保持距离。',
+      trait: '热情开朗，待人真诚，行动力强。但性子急躁，容易冲动。面色红润，精力旺盛。'
+    },
+    2: {
+      career: '适合房地产、建筑、金融、农业等行业。土主信，诚实可靠，稳扎稳打。',
+      wealth: '财运稳定增长，善于积蓄。适合长期理财和不动产投资。中年后财富积累渐丰。',
+      love:  '感情忠诚专一，是可靠的伴侣人选。但有时缺乏浪漫。相亲或经人介绍成功率较高。',
+      trait: '敦厚诚实，重信守诺，包容心强。但有时思维不够灵活。体型偏圆润厚实。'
+    },
+    3: {
+      career: '适合金融法律、军警、机械制造、珠宝等行业。金主义，刚毅果断，有领导才能。',
+      wealth: '财运较旺，善于把握商机。但需防大手大脚，做好资金规划。正财偏财皆有斩获。',
+      love:  '感情上较为刚强，占有欲强。需学会温柔体贴。男性有男子气概，女性为女强人型。',
+      trait: '果断刚强，讲义气，做事雷厉风行。有时倔强不肯低头。面方肤白，骨骼分明。'
+    },
+    4: {
+      career: '适合贸易物流、旅游、传媒、艺术创作等行业。水主智，聪明灵活，善于沟通。',
+      wealth: '财运上下波动，需灵活应变。有创意赚钱能力，但储蓄意识较弱。宜多元化收入来源。',
+      love:  '感情丰富细腻，但也多愁善感。需找能包容理解的伴侣。桃花运好但需防烂桃花。',
+      trait: '聪慧机敏，善于思考，适应力极强。但有时多虑犹豫。身材偏瘦，气质清冷。'
+    }
+  };
+
+  const em = elemMessages[dayElem];
+  summary += `<p><b>💼 事业：</b>${em.career}</p>`;
+  summary += `<p><b>💰 财运：</b>${em.wealth}</p>`;
+  summary += `<p><b>❤️ 感情：</b>${em.love}</p>`;
+  summary += `<p><b>🧠 性格：</b>${em.trait}</p>`;
+
+  document.getElementById('fortune-summary').innerHTML = summary;
+}
+
+// ===========================
+//  INIT
+// ===========================
+
+function populateDays() {
+  const month = parseInt(document.getElementById('month').value);
+  const year = parseInt(document.getElementById('year').value) || 2024;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const daySelect = document.getElementById('day');
+  const currentDay = daySelect.value || 1;
+  daySelect.innerHTML = '';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d + '日';
+    if (d === parseInt(currentDay) && d <= daysInMonth) opt.selected = true;
+    daySelect.appendChild(opt);
+  }
+}
+
+document.getElementById('month').addEventListener('change', populateDays);
+document.getElementById('year').addEventListener('change', populateDays);
+populateDays();
+
+// Set default day to middle of month
+const daySelect = document.getElementById('day');
+setTimeout(() => {
+  if (!daySelect.value || daySelect.value === '') {
+    const mid = Math.floor(daySelect.options.length / 2);
+    if (daySelect.options[mid]) daySelect.options[mid].selected = true;
+  }
+}, 10);
+</script>
+
+</body>
+</html>
